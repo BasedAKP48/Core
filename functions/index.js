@@ -10,12 +10,17 @@ const rootRef = admin.database().ref();
 // The fields that a message is required to contain.
 const REQUIRED_MESSAGE_FIELDS = [
   'uid', // User ID
+  'cid', // Client ID
   'text', // The message text
-  'cid' // Client ID
+  'channel', // What channel the message came from
+  'msgType' // What type of message this is
 ];
 
 // The fields that a message can contain, but aren't required.
-const OPTIONAL_MESSAGE_FIELDS = [];
+const OPTIONAL_MESSAGE_FIELDS = [
+  'extra_client_info', // Anything a client might need to "remember" about a message can go here.
+  'timeReceived' // The time the message was received. If not included, this will be generated.
+];
 
 /**
  * Messages must have certain properties before they can be acted upon by the core and plugins.
@@ -23,7 +28,6 @@ const OPTIONAL_MESSAGE_FIELDS = [];
  * queue.
  */
 exports.processIncomingChatMessage = functions.database.ref('/inbound_raw_messages/{pushId}').onWrite(processMessage);
-exports.processIncomingResponseMessage = functions.database.ref('/inbound_raw_responses/{pushId}').onWrite(processMessage);
 
 function processMessage(e) {
   let msg = e.data.val();
@@ -43,7 +47,34 @@ function processMessage(e) {
     }
   }
 
+  if(!msg.timeReceived) {
+    msg.timeReceived = Date.now();
+  }
+
   return rootRef.child('messages').push().set(msg).then(() => {
     return e.data.adminRef.remove();
   });
 }
+
+exports.processTestCommand = functions.database.ref('/messages/{pushId}').onWrite((e) => {
+  let msg = e.data.val();
+  if(msg.text === '.test') {
+    let response = {
+      uid: 'BasedAKP48Core',
+      cid: 'BasedAKP48Core',
+      text: 'You have successfully completed testing.',
+      channel: msg.channel,
+      msgType: 'chatMessage',
+      timeReceived: Date.now()
+    }
+
+    let responseRef = rootRef.child('messages').push();
+    let responseKey = responseRef.key;
+
+    let updateData = {};
+    updateData[`messages/${responseKey}`] = response;
+    updateData[`clients/${msg.cid}/${responseKey}`] = response;
+
+    return rootRef.update(updateData);
+  }
+});
