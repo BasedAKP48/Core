@@ -53,6 +53,10 @@ function processMessage(e) {
 
   return rootRef.child('messages').push().set(msg).then(() => {
     return e.data.adminRef.remove();
+  }).then(() => {
+    rootRef.child('totalMessageCount').transaction((count) => {
+      return (count || 0) + 1;
+    });
   });
 }
 
