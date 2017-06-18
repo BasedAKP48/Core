@@ -1,0 +1,14 @@
+{
+  "name": "based-akp48-core",
+  "version": "0.0.1",
+  "description": "BasedAKP48Core is a Firebase project containing the core of AKP48.",
+  "main": "index.js",
+  "repository": "git@github.com:BasedAKP48/BasedAKP48Core",
+  "author": "Austin Peterson <austin@akpwebdesign.com>",
+  "license": "MIT",
+  "dependencies": {
+    "firebase-admin": "~4.2.1",
+    "firebase-functions": "^0.5.7"
+  },
+  "private": true
+}
