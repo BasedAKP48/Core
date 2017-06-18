@@ -58,10 +58,10 @@ function processMessage(e) {
 
 exports.incrementMessageCounter = functions.database.ref('/messages/{pushId}').onWrite((e) => {
   // Messages only count if they are new, and aren't removed.
-  if (event.data.previous.exists() || !event.data.exists()) {
+  if (e.data.previous.exists() || !e.data.exists()) {
     return;
   }
-  
+
   return rootRef.child('totalMessageCount').transaction((count) => {
     return (count || 0) + 1;
   });
