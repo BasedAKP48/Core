@@ -53,12 +53,19 @@ function processMessage(e) {
 
   return rootRef.child('messages').push().set(msg).then(() => {
     return e.data.adminRef.remove();
-  }).then(() => {
-    rootRef.child('totalMessageCount').transaction((count) => {
-      return (count || 0) + 1;
-    });
   });
 }
+
+exports.incrementMessageCounter = functions.database.ref('/messages/{pushId}').onWrite((e) => {
+  // Messages only count if they are new, and aren't removed.
+  if (event.data.previous.exists() || !event.data.exists()) {
+    return;
+  }
+  
+  return rootRef.child('totalMessageCount').transaction((count) => {
+    return (count || 0) + 1;
+  });
+});
 
 exports.processTestCommand = functions.database.ref('/messages/{pushId}').onWrite((e) => {
   let msg = e.data.val();
