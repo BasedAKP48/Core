@@ -1,6 +1,13 @@
 {
   "rules": {
     ".read": "auth != null",
-    ".write": "auth != null"
+    ".write": "auth != null",
+    "messages": {
+      ".indexOn": [ "timeReceived" ]
+    },
+    "totalMessageCount": {
+      ".read": "true",
+      ".write": "auth != null"
+    }
   }
 }

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+    <title>BasedAKP48 Statistics</title>
 
     <!-- update the version number as needed -->
     <script defer src="/__/firebase/4.1.2/firebase-app.js"></script>
@@ -18,7 +18,7 @@
     <style media="screen">
       body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
       #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
+      #message h2 { font-weight: bold; font-size: 18px; margin: 0 0 8px; }
       #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
       #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
       #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
@@ -32,8 +32,8 @@
   </head>
   <body>
     <div id="message">
-      <h1>Coming Soon</h1>
-      <p>This will probably be a pretty cool page sometime soon. For now, it's not.</p>
+      <h1>Total Messages Sent/Received:</h1>
+      <h2 id="messageCount">?????</h2>
     </div>
 
     <script>
@@ -49,8 +49,9 @@
         // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
         try {
-          let app = firebase.app();
-          let features = ['auth', 'database', 'messaging', 'storage'].filter(feature => typeof app[feature] === 'function');
+          firebase.database().ref('/totalMessageCount').on('value', function(d) {
+            document.getElementById('messageCount').innerHTML = d.val();
+          });
         } catch (e) {
           console.error(e);
         }

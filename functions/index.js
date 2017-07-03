@@ -1,5 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const Promise = require('bluebird');
 
 // Initialize the Firebase app using firebase-functions built-in config object.
 admin.initializeApp(functions.config().firebase);
@@ -22,23 +23,34 @@ const OPTIONAL_MESSAGE_FIELDS = [
   'timeReceived' // The time the message was received. If not included, this will be generated.
 ];
 
+const DEFAULT_PERMISSIONS_OBJECT = {
+  BasedAKP48: {
+    User: true
+  }
+};
+
 /**
  * Messages must have certain properties before they can be acted upon by the core and plugins.
  * These functions ensure that any incoming messages include all required properties before being moved to the messages
  * queue.
  */
-exports.processIncomingChatMessage = functions.database.ref('/inbound_raw_messages/{pushId}').onWrite(processMessage);
+exports.processIncomingChatMessage = functions.database.ref('/incomingMessages/{pushId}').onWrite(processMessage);
 
 function processMessage(e) {
   let msg = e.data.val();
+  // if we don't have a message, just return.
   if(!msg) { return; }
+
+  // for each required field, make sure the message has the field.
   for (let i = 0; i < REQUIRED_MESSAGE_FIELDS.length; i++) {
     let field = REQUIRED_MESSAGE_FIELDS[i];
     if(!msg[field]) {
-      return e.data.adminRef.remove(); // remove the raw message from the queue, as it is malformed.
+      return e.data.adminRef.remove(); // if not, remove the raw message from the queue, as it is malformed.
     }
   }
 
+  // for each field in the message, verify that the keys provided are either required or optional.
+  // if the keys aren't in either of our arrays, they are extraneous, and should be removed.
   for (let k in msg) {
     if (msg.hasOwnProperty(k)) {
       if(!OPTIONAL_MESSAGE_FIELDS.includes(k) && !REQUIRED_MESSAGE_FIELDS.includes(k)) {
@@ -47,12 +59,31 @@ function processMessage(e) {
     }
   }
 
+  // add the time received, if the providing plugin did not populate it.
   if(!msg.timeReceived) {
     msg.timeReceived = Date.now();
   }
 
-  return rootRef.child('messages').push().set(msg).then(() => {
-    return e.data.adminRef.remove();
+  return new Promise((resolve) => {
+    // get permissions of the user who sent this message
+    rootRef.child(`permissions/${msg.uid.replace(/\./g, '_')}`).once('value', (d) => {
+      let permissions = d.val();
+      if(!permissions) {
+        // if no permissions found, set the default permissions object as the user's permissions.
+        d.ref.set(DEFAULT_PERMISSIONS_OBJECT).then(() => {
+          msg.permissions = permissions;
+          resolve(msg);
+        });
+      } else {
+        msg.permissions = permissions;
+        resolve(msg);
+      }
+    });
+  }).then((msg) => {
+    // push the message into the messages queue and remove it from the raw messages queue.
+    return rootRef.child('messages').push().set(msg).then(() => {
+      return e.data.adminRef.remove();
+    });
   });
 }
 
@@ -62,30 +93,8 @@ exports.incrementMessageCounter = functions.database.ref('/messages/{pushId}').o
     return;
   }
 
+  // increment total message count inside a transaction to be sure we increment properly.
   return rootRef.child('totalMessageCount').transaction((count) => {
     return (count || 0) + 1;
-  });
-});
-
-exports.processTestCommand = functions.database.ref('/messages/{pushId}').onWrite((e) => {
-  let msg = e.data.val();
-  if(msg.text === '.test') {
-    let response = {
-      uid: 'BasedAKP48Core',
-      cid: 'BasedAKP48Core',
-      text: 'You have successfully completed testing.',
-      channel: msg.channel,
-      msgType: 'chatMessage',
-      timeReceived: Date.now()
-    }
-
-    let responseRef = rootRef.child('messages').push();
-    let responseKey = responseRef.key;
-
-    let updateData = {};
-    updateData[`messages/${responseKey}`] = response;
-    updateData[`clients/${msg.cid}/${responseKey}`] = response;
-
-    return rootRef.update(updateData);
-  }
+  }).then(()=>{}); // The then() call is to work around a firebase-admin bug.
 });
