@@ -1,9 +1,13 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const Promise = require('bluebird');
+const Rollbar = require('rollbar');
 
 // Initialize the Firebase app using firebase-functions built-in config object.
 admin.initializeApp(functions.config().firebase);
+
+// Initialize Rollbar, which handles error tracking.
+const rollbar = new Rollbar(functions.config().app.rollbar.token);
 
 // Reference to the root of our database, for convenience.
 const rootRef = admin.database().ref();
@@ -31,11 +35,9 @@ const DEFAULT_PERMISSIONS_OBJECT = {
 
 /**
  * Messages must have certain properties before they can be acted upon by the core and plugins.
- * These functions ensure that any incoming messages include all required properties before being moved to the messages
+ * This function ensures that any incoming messages include all required properties before being moved to the messages
  * queue.
  */
-exports.processIncomingChatMessage = functions.database.ref('/incomingMessages/{pushId}').onWrite(processMessage);
-
 function processMessage(e) {
   let msg = e.data.val();
   // if we don't have a message, just return.
@@ -45,6 +47,7 @@ function processMessage(e) {
   for (let i = 0; i < REQUIRED_MESSAGE_FIELDS.length; i++) {
     let field = REQUIRED_MESSAGE_FIELDS[i];
     if(!msg[field]) {
+      rollbar.error(`Caught a malformed message!`, msg);
       return e.data.adminRef.remove(); // if not, remove the raw message from the queue, as it is malformed.
     }
   }
@@ -87,7 +90,7 @@ function processMessage(e) {
   });
 }
 
-exports.incrementMessageCounter = functions.database.ref('/messages/{pushId}').onWrite((e) => {
+function incrementCounter(e) {
   // Messages only count if they are new, and aren't removed.
   if (e.data.previous.exists() || !e.data.exists()) {
     return;
@@ -97,4 +100,7 @@ exports.incrementMessageCounter = functions.database.ref('/messages/{pushId}').o
   return rootRef.child('totalMessageCount').transaction((count) => {
     return (count || 0) + 1;
   }).then(()=>{}); // The then() call is to work around a firebase-admin bug.
-});
+};
+
+exports.processIncomingChatMessage = functions.database.ref('/incomingMessages/{pushId}').onWrite(processMessage);
+exports.incrementMessageCounter = functions.database.ref('/messages/{pushId}').onWrite(incrementCounter);
