@@ -46,7 +46,7 @@ function processMessage(e) {
   // for each required field, make sure the message has the field.
   for (let i = 0; i < REQUIRED_MESSAGE_FIELDS.length; i++) {
     let field = REQUIRED_MESSAGE_FIELDS[i];
-    if(!msg[field]) {
+    if(msg[field] === null || msg[field] === undefined) {
       rollbar.error(`Caught a malformed message!`, msg);
       return e.data.adminRef.remove(); // if not, remove the raw message from the queue, as it is malformed.
     }
