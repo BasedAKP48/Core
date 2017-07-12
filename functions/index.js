@@ -82,7 +82,7 @@ function processMessage(e) {
       let permissions = d.val();
       if(!permissions) {
         // TODO: See definition of WEBCHAT_PERMISSIONS_OBJECT. This needs to move / be replaced.
-        if(msg.uid.includes('webchat')) {
+        if(msg.uid.toLowerCase().includes('webchat')) {
           d.ref.set(WEBCHAT_PERMISSIONS_OBJECT).then(() => {
             msg.permissions = permissions;
             resolve(msg);
