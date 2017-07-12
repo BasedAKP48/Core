@@ -33,6 +33,15 @@ const DEFAULT_PERMISSIONS_OBJECT = {
   }
 };
 
+// Really shouldn't be part of BasedAKP48Core.
+// TODO: Move this check into IRC connector / provide a way for connectors to give a default config 
+// for different types of users.
+const WEBCHAT_DEFAULT_PERMISSIONS_OBJECT = {
+  BasedAKP48: {
+    Webchat: true
+  }
+};
+
 /**
  * Messages must have certain properties before they can be acted upon by the core and plugins.
  * This function ensures that any incoming messages include all required properties before being moved to the messages
@@ -72,6 +81,14 @@ function processMessage(e) {
     rootRef.child(`permissions/${msg.uid.replace(/\./g, '_')}`).once('value', (d) => {
       let permissions = d.val();
       if(!permissions) {
+        // TODO: See definition of WEBCHAT_PERMISSIONS_OBJECT. This needs to move / be replaced.
+        if(msg.uid.includes('webchat')) {
+          d.ref.set(WEBCHAT_PERMISSIONS_OBJECT).then(() => {
+            msg.permissions = permissions;
+            resolve(msg);
+          });
+          return;
+        }
         // if no permissions found, set the default permissions object as the user's permissions.
         d.ref.set(DEFAULT_PERMISSIONS_OBJECT).then(() => {
           msg.permissions = permissions;
