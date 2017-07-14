@@ -11,28 +11,28 @@ I hereby claim:
 To do so, I am signing this object:
 
 {
-    &quot;body&quot;: {
-        &quot;key&quot;: {
-            &quot;eldest_kid&quot;: &quot;01016cbbe46e686bd07d410bd4f948c858ded42e10e8ef7106e1a0bbf3c72258506d0a&quot;,
-            &quot;fingerprint&quot;: &quot;dd3b6518b4f26b01a1522981de4c1ca512c13417&quot;,
-            &quot;host&quot;: &quot;keybase.io&quot;,
-            &quot;key_id&quot;: &quot;de4c1ca512c13417&quot;,
-            &quot;kid&quot;: &quot;01016cbbe46e686bd07d410bd4f948c858ded42e10e8ef7106e1a0bbf3c72258506d0a&quot;,
-            &quot;uid&quot;: &quot;a62d787db3e30fa4fff1b0f7cd526419&quot;,
-            &quot;username&quot;: &quot;akp&quot;
+    "body": {
+        "key": {
+            "eldest_kid": "01016cbbe46e686bd07d410bd4f948c858ded42e10e8ef7106e1a0bbf3c72258506d0a",
+            "fingerprint": "dd3b6518b4f26b01a1522981de4c1ca512c13417",
+            "host": "keybase.io",
+            "key_id": "de4c1ca512c13417",
+            "kid": "01016cbbe46e686bd07d410bd4f948c858ded42e10e8ef7106e1a0bbf3c72258506d0a",
+            "uid": "a62d787db3e30fa4fff1b0f7cd526419",
+            "username": "akp"
         },
-        &quot;service&quot;: {
-            &quot;hostname&quot;: &quot;akp48.akpmakes.tech&quot;,
-            &quot;protocol&quot;: &quot;https:&quot;
+        "service": {
+            "hostname": "akp48.akpmakes.tech",
+            "protocol": "https:"
         },
-        &quot;type&quot;: &quot;web_service_binding&quot;,
-        &quot;version&quot;: 1
+        "type": "web_service_binding",
+        "version": 1
     },
-    &quot;ctime&quot;: 1500046713,
-    &quot;expire_in&quot;: 157680000,
-    &quot;prev&quot;: &quot;18f3f8f860d2250dd39421874ffcded486b69e5674e06f480099667baa75bcc3&quot;,
-    &quot;seqno&quot;: 71,
-    &quot;tag&quot;: &quot;signature&quot;
+    "ctime": 1500046713,
+    "expire_in": 157680000,
+    "prev": "18f3f8f860d2250dd39421874ffcded486b69e5674e06f480099667baa75bcc3",
+    "seqno": 71,
+    "tag": "signature"
 }
 
 which yields the signature:
