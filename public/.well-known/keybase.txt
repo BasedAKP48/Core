@@ -1,0 +1,68 @@
+==================================================================
+https://keybase.io/akp
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://akp48.akpmakes.tech
+  * I am akp (https://keybase.io/akp) on keybase.
+  * I have a public key with fingerprint DD3B 6518 B4F2 6B01 A152  2981 DE4C 1CA5 12C1 3417
+
+To do so, I am signing this object:
+
+{
+    &quot;body&quot;: {
+        &quot;key&quot;: {
+            &quot;eldest_kid&quot;: &quot;01016cbbe46e686bd07d410bd4f948c858ded42e10e8ef7106e1a0bbf3c72258506d0a&quot;,
+            &quot;fingerprint&quot;: &quot;dd3b6518b4f26b01a1522981de4c1ca512c13417&quot;,
+            &quot;host&quot;: &quot;keybase.io&quot;,
+            &quot;key_id&quot;: &quot;de4c1ca512c13417&quot;,
+            &quot;kid&quot;: &quot;01016cbbe46e686bd07d410bd4f948c858ded42e10e8ef7106e1a0bbf3c72258506d0a&quot;,
+            &quot;uid&quot;: &quot;a62d787db3e30fa4fff1b0f7cd526419&quot;,
+            &quot;username&quot;: &quot;akp&quot;
+        },
+        &quot;service&quot;: {
+            &quot;hostname&quot;: &quot;akp48.akpmakes.tech&quot;,
+            &quot;protocol&quot;: &quot;https:&quot;
+        },
+        &quot;type&quot;: &quot;web_service_binding&quot;,
+        &quot;version&quot;: 1
+    },
+    &quot;ctime&quot;: 1500046713,
+    &quot;expire_in&quot;: 157680000,
+    &quot;prev&quot;: &quot;18f3f8f860d2250dd39421874ffcded486b69e5674e06f480099667baa75bcc3&quot;,
+    &quot;seqno&quot;: 71,
+    &quot;tag&quot;: &quot;signature&quot;
+}
+
+which yields the signature:
+
+-----BEGIN PGP MESSAGE-----
+Version: Keybase OpenPGP v2.0.73
+Comment: https://keybase.io/crypto
+
+yMIuAnicrVJbSFRBGN61tDSyKDMsEDsEZW3bzLnMObsEhUhaGYVEsZEsZ87M0cPW
+nm33rCa2XaSbiLdIS3sIIkgNhCLJSkvTJPVBiEAICkOEDMpbV4JqjhS99NjLDPP/
+3/fN9/0zfYvnOZKcrunqfl9DzTbnUE9T1OErGi8t47BJSjlvGRegcxs9TGjE8gcM
+wnk5AAFEGsZURBQpCBMgExECTETdIyqaIimEEpGnEFCF6jIEiEIVYKwLmszzkiIB
+RIDKuTjdCBbScChsBC0mS4iAkQQVLOo8wgCqUOJ5jwIJFTWoqRLkNSiIUGbEIjNi
+M5g5rEao2zBZjR38c/b+gf/PvqNzciriiazIBAtUALoq6roOMdBljUg8EqHHBkZo
+OKgeoTY6EOJiLo4Vig2N2jO1Q/xtioqbrUfUAI24LaoVMXYobFqmZh5mgCLLCkW8
+toBVGrIZJRT7f2v5sREkbJKMUUzDEcMMcl7IkJpl2OJQAgCISIaCi6PHQkaY+g0b
+IclIYR1g30OLmSRUdEFXdAUBwtIC9hwekYeKzIJp9mDYxJCHSkgWKUC6yMgeD0Iy
+VlVZwpomcHa6o0GT88qQ+VQLmWbEKAyqVjRMudiT7kPzHc4kR0J8nP3FHEmJS/98
+vA/OBT/zH6R9z794f8PRpmzS+OL+86pYybMN1f5k78Dgx9TXGYHM899mdyhL82/U
+553wwcrG2s1n6tzpp0evJg2/rXpV0v2otTmQ3S501pbG7d3XklXwvT9rvMdMyV3d
+PhP90rNo+7LJgcqC4d273mxKyU3b6OsduZPXkXxrdvbAwfiap813xmucd49PXP/W
+ktPS/nlNfUeDP2vq3pKO1v2nV239NFh+8supszj3wImx2dFrZW0ZLyuubAkmru9q
+nBjrjh+Z+TheF+29JLdtMSeH0hK+nutMX5ewvGFlTk7f9MK0+NGHF6berRUzx37s
+6dp5s0BtCD2ODcQuD868d1es6K64nZB6r7wt5Rf9F0jM
+=YIka
+-----END PGP MESSAGE-----
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/akp
+
+==================================================================
