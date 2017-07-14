@@ -81,7 +81,7 @@ function processMessage(e) {
     rootRef.child(`permissions/${msg.uid.replace(/\./g, '_')}`).once('value', (d) => {
       let permissions = d.val();
       if(!permissions) {
-        // TODO: See definition of WEBCHAT_PERMISSIONS_OBJECT. This needs to move / be replaced.
+        // TODO: See definition of WEBCHAT_DEFAULT_PERMISSIONS_OBJECT. This needs to move / be replaced.
         if(msg.uid.toLowerCase().includes('webchat')) {
           d.ref.set(WEBCHAT_DEFAULT_PERMISSIONS_OBJECT).then(() => {
             msg.permissions = permissions;
