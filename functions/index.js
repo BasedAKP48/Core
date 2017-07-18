@@ -27,28 +27,14 @@ const OPTIONAL_MESSAGE_FIELDS = [
   'timeReceived' // The time the message was received. If not included, this will be generated.
 ];
 
-const DEFAULT_PERMISSIONS_OBJECT = {
-  BasedAKP48: {
-    User: true
-  }
-};
-
-// Really shouldn't be part of BasedAKP48Core.
-// TODO: Move this check into IRC connector / provide a way for connectors to give a default config 
-// for different types of users.
-const WEBCHAT_DEFAULT_PERMISSIONS_OBJECT = {
-  BasedAKP48: {
-    Webchat: true
-  }
-};
-
 /**
  * Messages must have certain properties before they can be acted upon by the core and plugins.
  * This function ensures that any incoming messages include all required properties before being moved to the messages
  * queue.
  */
-function processMessage(e) {
+function processMessage(e, outgoing) {
   let msg = e.data.val();
+
   // if we don't have a message, just return.
   if(!msg) { return; }
 
@@ -76,35 +62,19 @@ function processMessage(e) {
     msg.timeReceived = Date.now();
   }
 
-  return new Promise((resolve) => {
-    // get permissions of the user who sent this message
-    rootRef.child(`permissions/${msg.uid.replace(/\./g, '_')}`).once('value', (d) => {
-      let permissions = d.val();
-      if(!permissions) {
-        // TODO: See definition of WEBCHAT_DEFAULT_PERMISSIONS_OBJECT. This needs to move / be replaced.
-        if(msg.uid.toLowerCase().includes('webchat')) {
-          d.ref.set(WEBCHAT_DEFAULT_PERMISSIONS_OBJECT).then(() => {
-            msg.permissions = permissions;
-            resolve(msg);
-          });
-          return;
-        }
-        // if no permissions found, set the default permissions object as the user's permissions.
-        d.ref.set(DEFAULT_PERMISSIONS_OBJECT).then(() => {
-          msg.permissions = permissions;
-          resolve(msg);
-        });
-      } else {
-        msg.permissions = permissions;
-        resolve(msg);
-      }
-    });
-  }).then((msg) => {
-    // push the message into the messages queue and remove it from the raw messages queue.
-    return rootRef.child('messages').push().set(msg).then(() => {
-      return e.data.adminRef.remove();
-    });
+  // push the message into the messages queue and remove it from the raw messages queue.
+  return rootRef.child('messages').push().set(msg).then(() => {
+    if(outgoing) {
+      return rootRef.child(`clients/${msg.cid}`).push().set(msg);
+    }
+  }).then(() => {
+    return e.data.adminRef.remove();
   });
+}
+
+// Just calls processMessage with the outgoing flag set to true.
+function processOutgoingMessage(e) {
+  return processMessage(e, true);
 }
 
 function incrementCounter(e) {
@@ -120,4 +90,5 @@ function incrementCounter(e) {
 };
 
 exports.processIncomingChatMessage = functions.database.ref('/incomingMessages/{pushId}').onWrite(processMessage);
+exports.processOutgoingChatMessage = functions.database.ref('/outgoingMessages/{pushId}').onWrite(processOutgoingMessage);
 exports.incrementMessageCounter = functions.database.ref('/messages/{pushId}').onWrite(incrementCounter);
