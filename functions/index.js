@@ -2,6 +2,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const Promise = require('bluebird');
 const Rollbar = require('rollbar');
+const crypto = require('crypto');
 
 // Initialize the Firebase app using firebase-functions built-in config object.
 admin.initializeApp(functions.config().firebase);
@@ -89,6 +90,118 @@ function incrementCounter(e) {
   }).then(()=>{}); // The then() call is to work around a firebase-admin bug.
 };
 
+function processGitHubWebhook(req, res) {
+  rootRef.child('config/githubHookAlerts').once('value', (v) => {
+    let config = v.val();
+
+    let event_type = req.get('X-GitHub-Event');
+    let signature = req.get('X-Hub-Signature');
+
+    if(config.secret) {
+      let computedSignature = `sha1=${crypto.createHmac("sha1", config.secret).update(JSON.stringify(req.body)).digest("hex")}`;
+      if(!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(computedSignature))) {
+        return res.send(400);
+      }
+    }
+
+    res.send(200);
+
+    let content;
+
+    if(GitHubEvents[event_type]) {
+      content = GitHubEvents[event_type](req.body);
+    } else {
+      content = GitHubEvents.default(event_type, req.body);
+    }
+
+    if(!content) {
+      return;
+    }
+
+    let response = {
+      uid: 'BasedAKP48Core',
+      text: content.txt,
+      msgType: 'chatMessage',
+      timeReceived: Date.now(),
+      extra_client_info: content.extra || null
+    }
+
+    let respPromises = [];
+
+    for (let client in config.alertClients) {
+      if (config.alertClients.hasOwnProperty(client)) {
+        let c = config.alertClients[client];
+        c.channels.forEach((chan) => {
+          let r = Object.assign({}, response);
+          r.cid = c.client;
+          r.channel = chan;
+          respPromises.push(rootRef.child('outgoingMessages').push().set(r));
+        });
+      }
+    }
+
+    return Promise.all(respPromises);
+  });
+}
+
 exports.processIncomingChatMessage = functions.database.ref('/incomingMessages/{pushId}').onWrite(processMessage);
 exports.processOutgoingChatMessage = functions.database.ref('/outgoingMessages/{pushId}').onWrite(processOutgoingMessage);
 exports.incrementMessageCounter = functions.database.ref('/messages/{pushId}').onWrite(incrementCounter);
+exports.github = functions.https.onRequest(processGitHubWebhook);
+
+const GitHubEvents = {
+  push: (e) => {
+    fields = [];
+    if(e.head_commit) {
+      e.head_commit.added = e.head_commit.added.map(s => `+${s}`);  
+      e.head_commit.removed = e.head_commit.removed.map(s => `-${s}`);
+      e.head_commit.modified = e.head_commit.modified.map(s => `!${s}`); 
+      fields = [
+        {
+          name: "Hash",
+          value: e.head_commit.id.slice(0, 7),
+          inline: false
+        },
+        {
+          name: "Message",
+          value: e.head_commit.message,
+          inline: false
+        },
+        {
+          name: "Author",
+          value: `${e.head_commit.author.username} <${e.head_commit.author.email}>`,
+          inline: false
+        },
+        {
+          name: "Committer",
+          value: `${e.head_commit.committer.username} <${e.head_commit.committer.email}>`,
+          inline: false
+        },
+        {
+          name: "Changes",
+          value: `${'```diff\n'}${e.head_commit.added.join('\n')}${'\n'}${e.head_commit.removed.join('\n')}${'\n'}${e.head_commit.modified.join('\n')}${'\n```'}`,
+          inline: false
+        }
+      ];
+    }
+    
+    let discord_embed = {
+      title: "GitHub Push Event",
+      description: `${e.commits.length} ${e.commits.length == 1 ? 'commit' : 'commits'} ${e.forced ? "force " : ""}pushed by [${e.sender.login}](${e.sender.html_url}) to ${e.created ? "new branch " : ""}[${e.ref.split('/').splice(2, Infinity).join('/')}](${e.compare}). ${fields.length ? 'Head commit:' : ''}`,
+      url: e.head_commit.url,
+      color: 0x4183c4,
+      footer: {
+        text: "Data via GitHub.",
+        icon_url: "https://akp48.akpmakes.tech/img/github.com.png"
+      },
+      fields
+    };
+    return {txt: 'push event caught!', extra: { discord_embed }} ;
+  },
+  status: (e) => {
+    return null;
+  },
+  default: (t, e) => {
+    return {txt: t + ' event caught!'};
+  }
+}
