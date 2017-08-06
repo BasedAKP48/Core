@@ -151,54 +151,127 @@ exports.github = functions.https.onRequest(processGitHubWebhook);
 
 const GitHubEvents = {
   push: (e) => {
-    fields = [];
-    if(e.head_commit) {
-      e.head_commit.added = e.head_commit.added.map(s => `+${s}`);  
-      e.head_commit.removed = e.head_commit.removed.map(s => `-${s}`);
-      e.head_commit.modified = e.head_commit.modified.map(s => `!${s}`); 
-      fields = [
-        {
-          name: "Hash",
-          value: e.head_commit.id.slice(0, 7),
-          inline: false
-        },
-        {
-          name: "Message",
-          value: e.head_commit.message,
-          inline: false
-        },
-        {
-          name: "Author",
-          value: `${e.head_commit.author.username} <${e.head_commit.author.email}>`,
-          inline: false
-        },
-        {
-          name: "Committer",
-          value: `${e.head_commit.committer.username} <${e.head_commit.committer.email}>`,
-          inline: false
-        },
-        {
-          name: "Changes",
-          value: `${'```diff\n'}${e.head_commit.added.join('\n')}${'\n'}${e.head_commit.removed.join('\n')}${'\n'}${e.head_commit.modified.join('\n')}${'\n```'}`,
-          inline: false
-        }
-      ];
-    }
-    
+    let description = e.commits.map((c) => {
+      let msg = c.message.split('\n')[0];
+      return `[\`${c.id.slice(0, 7)}\`](${c.url}) | "${msg}" - [${c.committer.username}](https://github.com/${c.committer.username})`;
+    });
     let discord_embed = {
-      title: "GitHub Push Event",
-      description: `${e.commits.length} ${e.commits.length == 1 ? 'commit' : 'commits'} ${e.forced ? "force " : ""}pushed by [${e.sender.login}](${e.sender.html_url}) to ${e.created ? "new branch " : ""}[${e.ref.split('/').splice(2, Infinity).join('/')}](${e.compare}). ${fields.length ? 'Head commit:' : ''}`,
-      url: e.head_commit.url,
+      title: `[${e.repository.full_name}:${e.ref.split('/').splice(2, Infinity).join('/')}] ${e.commits.length} new ${e.commits.length == 1 ? 'commit' : 'commits'}${e.forced ? ' FORCE PUSHED' : ''}`,
+      description: description.join('\n'),
+      url: e.compare,
       color: 0x4183c4,
+      author: {
+        name: e.sender.login,
+        url: e.sender.html_url,
+        icon_url: e.sender.avatar_url
+      },
       footer: {
         text: "Data via GitHub.",
         icon_url: "https://akp48.akpmakes.tech/img/github.com.png"
-      },
-      fields
+      }
     };
     return {txt: 'push event caught!', extra: { discord_embed }} ;
   },
+  commit_comment: (e) => {
+    return null;
+  },
+  create: (e) => {
+    return null;
+  },
+  delete: (e) => {
+    return null;
+  },
+  deployment: (e) => {
+    return null;
+  },
+  deployment_status: (e) => {
+    return null;
+  },
+  fork: (e) => {
+    return null;
+  },
+  gollum: (e) => {
+    return null;
+  },
+  installation: (e) => {
+    return null;
+  },
+  installation_repositories: (e) => {
+    return null;
+  },
+  integration_installation: (e) => {
+    return null;
+  },
+  integration_installation_repositories: (e) => {
+    return null;
+  },
+  issue_comment: (e) => {
+    return null;
+  },
+  issues: (e) => {
+    return null;
+  },
+  label: (e) => {
+    return null;
+  },
+  marketplace_purchase: (e) => {
+    return null;
+  },
+  member: (e) => {
+    return null;
+  },
+  membership: (e) => {
+    return null;
+  },
+  milestone: (e) => {
+    return null;
+  },
+  organization: (e) => {
+    return null;
+  },
+  org_block: (e) => {
+    return null;
+  },
+  page_build: (e) => {
+    return null;
+  },
+  project_card: (e) => {
+    return null;
+  },
+  project_column: (e) => {
+    return null;
+  },
+  project: (e) => {
+    return null;
+  },
+  public: (e) => {
+    return null;
+  },
+  pull_request_review_comment: (e) => {
+    return null;
+  },
+  pull_request_review: (e) => {
+    return null;
+  },
+  pull_request: (e) => {
+    return null;
+  },
+  repository: (e) => {
+    return null;
+  },
+  release: (e) => {
+    return null;
+  },
   status: (e) => {
+    return null;
+  },
+  team: (e) => {
+    return null;
+  },
+  team_add: (e) => {
+    return null;
+  },
+  watch: (e) => {
     return null;
   },
   default: (t, e) => {
