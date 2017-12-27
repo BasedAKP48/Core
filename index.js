@@ -2,7 +2,7 @@ const admin = require('firebase-admin');
 const serviceAccount = require("./serviceAccount.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://basedakp48.firebaseio.com"
+  databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
 });
 
 admin.database().ref().child('pendingMessages').on('child_added', processMessage);
