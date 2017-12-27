@@ -9,10 +9,12 @@ admin.initializeApp({
 const rootRef = admin.database().ref();
 
 rootRef.child('pendingMessages').on('child_added', processMessage);
+let initialized = false;
 rootRef.child('.info/connected').on('value', (v) => {
   if (v.val() === true) {
     console.log('Core is now connected and listening for messages');
-  } else {
+    initialized = true;
+  } else if (initialized) {
     console.log('Core has disconnected from Firebase! Automatically attempting to reconnect...');
   }
 });
