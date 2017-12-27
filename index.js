@@ -5,7 +5,10 @@ admin.initializeApp({
   databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
 });
 
-admin.database().ref().child('pendingMessages').on('child_added', processMessage);
+// Reference to the root of our database, for convenience.
+const rootRef = admin.database().ref();
+
+rootRef.child('pendingMessages').on('child_added', processMessage);
 console.log('Core is now listening');
 
 // The fields that a message is required to contain.
