@@ -6,6 +6,7 @@ admin.initializeApp({
 });
 
 admin.database().ref().child('pendingMessages').on('child_added', processMessage);
+console.log('Core is now listening');
 
 // The fields that a message is required to contain.
 const REQUIRED_MESSAGE_FIELDS = [
