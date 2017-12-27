@@ -5,22 +5,25 @@ admin.initializeApp({
   databaseURL: "https://basedakp48.firebaseio.com"
 });
 
-const rootRef = admin.database().ref();
-
-rootRef.child('incomingMessages').on('child_added', (e) => { processMessage(e, false); });
-rootRef.child('outgoingMessages').on('child_added', (e) => { processMessage(e, true); });
+admin.database().ref().child('pendingMessages').on('child_added', processMessage);
 
 // The fields that a message is required to contain.
 const REQUIRED_MESSAGE_FIELDS = [
   'uid', // User ID
-  'cid', // Client ID
+  ['cid', 'target'], // Client ID (incoming) or Target ID (outgoing)
   'text', // The message text
   'channel', // What channel the message came from
   'msgType' // What type of message this is
 ];
 
-// The fields that a message can contain, but aren't required.
-const OPTIONAL_MESSAGE_FIELDS = [
+// The fields that a message can contain. Manually added all required fields for "efficiency."
+const ALLOWED_MESSAGE_FIELDS = [
+  'uid', // User ID
+  'cid', // Client ID (incoming)
+  'target', // Target ID (outgoing)
+  'text', // The message text
+  'channel', // What channel the message came from
+  'msgType', // What type of message this is
   'extra_client_info', // Anything a client might need to "remember" about a message can go here.
   'timeReceived' // The time the message was received. If not included, this will be generated.
 ];
@@ -30,7 +33,7 @@ const OPTIONAL_MESSAGE_FIELDS = [
  * This function ensures that any incoming messages include all required properties before being moved to the messages
  * queue.
  */
-function processMessage(e, outgoing) {
+function processMessage(e) {
   let msg = e.val();
 
   console.log(msg);
@@ -41,7 +44,7 @@ function processMessage(e, outgoing) {
   // for each required field, make sure the message has the field.
   for (let i = 0; i < REQUIRED_MESSAGE_FIELDS.length; i++) {
     let field = REQUIRED_MESSAGE_FIELDS[i];
-    if(msg[field] === null || msg[field] === undefined) {
+    if(!hasOne(msg, field)) {
       return e.ref.remove(); // if not, remove the raw message from the queue, as it is malformed.
     }
   }
@@ -49,16 +52,21 @@ function processMessage(e, outgoing) {
   // for each field in the message, verify that the keys provided are either required or optional.
   // if the keys aren't in either of our arrays, they are extraneous, and should be removed.
   for (let k in msg) {
-    if (msg.hasOwnProperty(k)) {
-      if(!OPTIONAL_MESSAGE_FIELDS.includes(k) && !REQUIRED_MESSAGE_FIELDS.includes(k)) {
-        delete msg[k];
-      }
+    if (msg.hasOwnProperty(k) && !ALLOWED_MESSAGE_FIELDS.includes(k)) {
+      delete msg[k];
     }
   }
 
   // add the time received, if the providing plugin did not populate it.
   if(!msg.timeReceived) {
     msg.timeReceived = Date.now();
+  }
+  
+  // Is this an outgoing message?
+  let outgoing = msg.hasOwnProperty['target'];
+  if (outgoing) {
+    msg['cid'] = msg['target'];
+    delete msg['target'];
   }
 
   // push the message into the messages queue and remove it from the raw messages queue.
@@ -69,4 +77,16 @@ function processMessage(e, outgoing) {
   }).then(() => {
     return e.ref.remove();
   });
+}
+
+function hasOne(object, array) {
+  if (!Array.isArray(array)) array = [array];
+  let count = 0;
+  for (let i = 0; i < array.length; i++) {
+    let key = array[i];
+    if (object.hasOwnProperty(key) && object[key] !== null && object[key] !== undefined) {
+      count++;
+    }
+  }
+  return count === 1;
 }
