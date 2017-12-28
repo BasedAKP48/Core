@@ -87,4 +87,3 @@ function hasOne(object, array) {
 }
 
 module.exports = functions.database.ref('/pendingMessages/{pushId}').onWrite(processMessage);
-module.exports.processMessage = processMessage; // Export for use in core
