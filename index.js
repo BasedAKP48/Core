@@ -75,7 +75,7 @@ function processMessage(e) {
   }
   
   // Is this an outgoing message?
-  let outgoing = msg.hasOwnProperty['target'];
+  let outgoing = msg.hasOwnProperty('target');
   if (outgoing) {
     msg['cid'] = msg['target'];
     delete msg['target'];
