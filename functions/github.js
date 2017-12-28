@@ -180,7 +180,7 @@ function processGitHubWebhook(req, res) {
           let r = Object.assign({}, response);
           r.cid = c.client;
           r.channel = chan;
-          respPromises.push(rootRef.child('outgoingMessages').push().set(r));
+          respPromises.push(rootRef.child('pendingMessages').push().set(r));
         });
       }
     }
