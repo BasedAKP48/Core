@@ -178,7 +178,7 @@ function processGitHubWebhook(req, res) {
         let c = config.alertClients[client];
         c.channels.forEach((chan) => {
           let r = Object.assign({}, response);
-          r.cid = c.client;
+          r.target = c.client;
           r.channel = chan;
           respPromises.push(rootRef.child('pendingMessages').push().set(r));
         });
