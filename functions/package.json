@@ -7,7 +7,6 @@
   "author": "Austin Peterson <austin@akpwebdesign.com>",
   "license": "MIT",
   "dependencies": {
-    "bluebird": "^3.5.0",
     "firebase-admin": "^5.6.0",
     "firebase-functions": "^0.7.5"
   },
