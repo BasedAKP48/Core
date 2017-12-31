@@ -50,7 +50,7 @@
 
         try {
           firebase.database().ref('/totalMessageCount').on('value', function(d) {
-            document.getElementById('messageCount').innerHTML = d.val();
+            document.getElementById('messageCount').innerHTML = d.val().toLocaleString();
           });
         } catch (e) {
           console.error(e);
