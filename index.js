@@ -25,7 +25,6 @@ const REQUIRED_MESSAGE_FIELDS = [
   ['cid', 'target'], // Client ID (incoming) or Target ID (outgoing)
   'text', // The message text
   'channel', // What channel the message came from
-  'type', // What type of message this is
 ];
 
 // The fields that a message can contain. Manually added all required fields for "efficiency."
@@ -79,11 +78,11 @@ function processMessage(e) {
   if (outgoing) {
     msg.cid = msg.target;
     delete msg.target;
-
-    msg.direction = 'out';
-  } else {
-    msg.direction = 'in';
   }
+  
+  // Set some defaults
+  msg.direction = outgoing ? 'out' : 'in';
+  msg.type = msg.type || 'text';
 
   // push the message into the messages queue and remove it from the raw messages queue.
   return rootRef.child('messages').push(msg).then(() => {
