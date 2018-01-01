@@ -36,7 +36,6 @@ const ALLOWED_MESSAGE_FIELDS = [
   'text', // The message text
   'channel', // What channel the message came from
   'type', // What type of message this is
-  'direction', // What direction this message is going (in, out)
   'extra_client_info', // Anything a client might need to "remember" about a message can go here.
   'timeReceived', // The time the message was received. If not included, this will be generated.
 ];
@@ -62,8 +61,8 @@ function processMessage(e) {
     }
   }
 
-  // for each field in the message, verify that the keys provided are either required or optional.
-  // if the keys aren't in either of our arrays, they are extraneous, and should be removed.
+  // for each field in the message, verify that the key is allowed.
+  // if the key is not allowed, it is extraneous, and should be removed.
   for (let k in msg) {
     if (msg.hasOwnProperty(k) && !ALLOWED_MESSAGE_FIELDS.includes(k)) {
       delete msg[k];
