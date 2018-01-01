@@ -25,7 +25,8 @@ const REQUIRED_MESSAGE_FIELDS = [
   ['cid', 'target'], // Client ID (incoming) or Target ID (outgoing)
   'text', // The message text
   'channel', // What channel the message came from
-  'msgType' // What type of message this is
+  'type', // What type of message this is
+  'direction', // What direction this message is going (in, out)
 ];
 
 // The fields that a message can contain. Manually added all required fields for "efficiency."
@@ -35,9 +36,10 @@ const ALLOWED_MESSAGE_FIELDS = [
   'target', // Target ID (outgoing)
   'text', // The message text
   'channel', // What channel the message came from
-  'msgType', // What type of message this is
+  'type', // What type of message this is
+  'direction', // What direction this message is going (in, out)
   'extra_client_info', // Anything a client might need to "remember" about a message can go here.
-  'timeReceived' // The time the message was received. If not included, this will be generated.
+  'timeReceived', // The time the message was received. If not included, this will be generated.
 ];
 
 /**
@@ -77,8 +79,11 @@ function processMessage(e) {
   // Is this an outgoing message?
   let outgoing = msg.hasOwnProperty('target');
   if (outgoing) {
-    msg['cid'] = msg['target'];
-    delete msg['target'];
+    msg.cid = msg.target;
+    delete msg.target;
+
+    // this should already be out, but might as well make sure
+    msg.direction = 'out';
   }
 
   // push the message into the messages queue and remove it from the raw messages queue.
