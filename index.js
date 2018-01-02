@@ -83,6 +83,14 @@ function processMessage(e) {
   // Set some defaults
   msg.direction = outgoing ? 'out' : 'in';
   msg.type = msg.type || 'text';
+  
+  // Is this an internal message?
+  if (msg.type.toLowerCase() === 'internal' || msg.type.toLowerCase() === 'akpacket') {
+      msg.type = 'internal'; // force a standardized type
+      return rootRef.child(`clients/${msg.cid}`).push(msg).then(() => {
+          return e.ref.remove();
+      });
+  }
 
   // push the message into the messages queue and remove it from the raw messages queue.
   return rootRef.child('messages').push(msg).then(() => {
