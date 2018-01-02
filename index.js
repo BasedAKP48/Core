@@ -1,9 +1,8 @@
 const admin = require('firebase-admin');
 const serviceAccount = require("./serviceAccount.json");
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
-});
+const { initialize } = require('@basedakp48/plugin-utils');
+
+initialize(admin, serviceAccount);
 
 // Reference to the root of our database, for convenience.
 const rootRef = admin.database().ref();
@@ -55,7 +54,7 @@ function processMessage(e) {
   // for each required field, make sure the message has the field.
   for (let i = 0; i < REQUIRED_MESSAGE_FIELDS.length; i++) {
     let field = REQUIRED_MESSAGE_FIELDS[i];
-    if(!hasOne(msg, field)) {
+    if (!hasOne(msg, field)) {
       return e.ref.remove(); // if not, remove the raw message from the queue, as it is malformed.
     }
   }
@@ -69,32 +68,32 @@ function processMessage(e) {
   }
 
   // add the time received, if the providing plugin did not populate it.
-  if(!msg.timeReceived) {
+  if (!msg.timeReceived) {
     msg.timeReceived = Date.now();
   }
-  
+
   // Is this an outgoing message?
   let outgoing = msg.hasOwnProperty('target');
   if (outgoing) {
     msg.cid = msg.target;
     delete msg.target;
   }
-  
+
   // Set some defaults
   msg.direction = outgoing ? 'out' : 'in';
   msg.type = msg.type || 'text';
-  
+
   // Is this an internal message?
   if (msg.type.toLowerCase() === 'internal' || msg.type.toLowerCase() === 'akpacket') {
-      msg.type = 'internal'; // force a standardized type
-      return rootRef.child(`clients/${msg.cid}`).push(msg).then(() => {
-          return e.ref.remove();
-      });
+    msg.type = 'internal';  // force a standardized type
+    return rootRef.child(`clients/${msg.cid}`).push(msg).then(() => {
+      return e.ref.remove();
+    });
   }
 
   // push the message into the messages queue and remove it from the raw messages queue.
   return rootRef.child('messages').push(msg).then(() => {
-    if(outgoing) {
+    if (outgoing) {
       rootRef.child(`clients/${msg.cid}`).push(msg);
     }
   }).then(() => {

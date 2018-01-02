@@ -2,6 +2,12 @@
 # yarn lockfile v1
 
 
+"@basedakp48/plugin-utils@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@basedakp48/plugin-utils/-/plugin-utils-1.6.0.tgz#d927af2b5d93ec98dbae3808b1dd5c1c0b05fb1d"
+  dependencies:
+    firebase-admin "^5.6.0"
+
 "@firebase/app-types@0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@firebase/app-types/-/app-types-0.1.0.tgz#27069ba4f8d74990eae7c88ec8f3d282e5215786"
