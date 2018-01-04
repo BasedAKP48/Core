@@ -19,16 +19,15 @@ presenceSystem.initialize({
   listenMode: 'core'
 });
 
-rootRef.child('pendingMessages').on('child_added', processMessage);
-let initialized = false;
-rootRef.child('.info/connected').on('value', (v) => {
-  if (v.val() === true) {
-    console.log('Core is now connected and listening for messages');
-    initialized = true;
-  } else if (initialized) {
-    console.log('Core has disconnected from Firebase! Automatically attempting to reconnect...');
-  }
+presenceSystem.on('connect', () => {
+  console.log('Core is now connected and listening for messages');
 });
+
+presenceSystem.on('disconnect', () => {
+  console.log('Core has disconnected from Firebase! Automatically attempting to reconnect...');
+});
+
+rootRef.child('pendingMessages').on('child_added', processMessage);
 
 // The fields that a message is required to contain.
 const REQUIRED_MESSAGE_FIELDS = [
