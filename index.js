@@ -1,11 +1,23 @@
 const admin = require('firebase-admin');
 const serviceAccount = require("./serviceAccount.json");
-const { initialize } = require('@basedakp48/plugin-utils');
+const { initialize, PresenceSystem } = require('@basedakp48/plugin-utils');
+const pkg = require('./package.json');
+
+const presenceSystem = new PresenceSystem();
 
 initialize(admin, serviceAccount);
 
 // Reference to the root of our database, for convenience.
 const rootRef = admin.database().ref();
+const cid = utils.getCID(rootRef, __dirname);
+
+presenceSystem.initialize({
+  rootRef,
+  cid,
+  pkg,
+  instanceName: 'Core',
+  listenMode: 'core'
+});
 
 rootRef.child('pendingMessages').on('child_added', processMessage);
 let initialized = false;
