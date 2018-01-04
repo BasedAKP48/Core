@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@basedakp48/plugin-utils@^1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@basedakp48/plugin-utils/-/plugin-utils-1.6.0.tgz#d927af2b5d93ec98dbae3808b1dd5c1c0b05fb1d"
+"@basedakp48/plugin-utils@^1.10.0":
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/@basedakp48/plugin-utils/-/plugin-utils-1.10.0.tgz#6ff8b252c38bb0cbe154ed490d199d57fb2f9e6d"
   dependencies:
     firebase-admin "^5.6.0"
 

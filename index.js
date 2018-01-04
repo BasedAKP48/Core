@@ -3,7 +3,7 @@ const serviceAccount = require("./serviceAccount.json");
 const { initialize, PresenceSystem } = require('@basedakp48/plugin-utils');
 const pkg = require('./package.json');
 
-const presenceSystem = new PresenceSystem();
+const presenceSystem = PresenceSystem();
 
 initialize(admin, serviceAccount);
 
