@@ -46,7 +46,7 @@ const ALLOWED_MESSAGE_FIELDS = [
   'text', // The message text
   'channel', // What channel the message came from
   'type', // What type of message this is
-  'extra_client_info', // Anything a client might need to "remember" about a message can go here.
+  'data', // Anything a client might need to "remember" about a message can go here.
   'timeReceived', // The time the message was received. If not included, this will be generated.
 ];
 
