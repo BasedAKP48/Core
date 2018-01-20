@@ -23,5 +23,9 @@
   "dependencies": {
     "@basedakp48/plugin-utils": "^1.10.0",
     "firebase-admin": "^5.6.0"
+  },
+  "devDependencies": {
+    "@basedakp48/eslint-config": "*",
+    "eslint": "^4.16.0"
   }
 }
