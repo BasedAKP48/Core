@@ -15,6 +15,8 @@
     <!-- initialize the SDK after all desired features are loaded -->
     <script defer src="/__/firebase/init.js"></script>
 
+    <script defer src="//momentjs.com/downloads/moment.min.js"></script>
+
     <style media="screen">
       body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
       #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
@@ -34,6 +36,9 @@
     <div id="message">
       <h1>Total Messages Sent/Received:</h1>
       <h2 id="messageCount">?????</h2>
+      <br />
+      <h1>Plugins:</h1>
+      <div id="pluginList"></div>
     </div>
 
     <script>
@@ -49,8 +54,52 @@
         // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
         try {
-          firebase.database().ref('/totalMessageCount').on('value', function(d) {
+          firebase.database().ref('/totalMessageCount').on('value', (d) => {
             document.getElementById('messageCount').innerHTML = d.val().toLocaleString();
+          });
+
+          firebase.database().ref('/registry').on('value', (d) => {
+            // TODO: more efficient?
+            const plugins = d.val();
+            let output = {};
+            Object.keys(plugins).forEach((pluginKey) => {
+              const plugin = plugins[pluginKey];
+              // not sure if object destructuring works in all common browsers
+              const pluginName = plugin.info.pluginName;
+              const instanceName = plugin.info.instanceName;
+              const version = plugin.info.pluginVersion;
+              let pluginType = plugin.info.listenMode;
+              if (pluginType === 'normal') {
+                pluginType = 'plugin';
+              }
+              
+              const p = plugin.presence;
+              let status = 'online';
+              if (!p.connected) {
+                status = 'offline';
+              }
+
+              let time = (p.connected ? p.lastConnect : p.lastDisconnect);
+              const timeString = moment(time).format('MMMM Do YYYY, h:mm:ss a');
+
+              // forces offline plugins to sort after online ones
+              if (!p.connected) {
+                time *= 2;
+              }
+
+              // put it all together now
+              output[time] = `<h3>${instanceName} (v${version})</h2>
+              <p>Package: <b>${pluginName}</b><br />
+              Type: <b>${pluginType}</b><br />
+              Status: <b>${status}</b><br />
+              Since: <b>${timeString}</b></p>
+              <hr />
+              `;
+            });
+
+            Object.keys(output).sort().reverse().forEach((k) => {
+              document.getElementById('pluginList').innerHTML += output[k];
+            });
           });
         } catch (e) {
           console.error(e);

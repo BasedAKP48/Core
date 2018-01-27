@@ -8,6 +8,10 @@
     "totalMessageCount": {
       ".read": "true",
       ".write": "false"
+    },
+    "registry": {
+      ".read": "true",
+      ".write": "false"
     }
   }
 }
