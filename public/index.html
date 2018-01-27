@@ -97,6 +97,9 @@
               `;
             });
 
+            // reset the pluginList element before we add to it
+            document.getElementById('pluginList').innerHTML = '';
+
             Object.keys(output).sort().reverse().forEach((k) => {
               document.getElementById('pluginList').innerHTML += output[k];
             });
