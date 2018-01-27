@@ -23,8 +23,9 @@
       #message h2 { font-weight: bold; font-size: 18px; margin: 0 0 8px; }
       #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
       #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+      /** #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; } **/
+      #message a { color: #0086e9; }
+      #message/**, #message a **/{ box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
       #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
       @media (max-width: 600px) {
         body, #message { margin-top: 0; background: white; box-shadow: none; }
@@ -89,7 +90,7 @@
 
               // put it all together now
               output[time] = `<h3>${instanceName} (v${version})</h2>
-              <p>Package: <b>${pluginName}</b><br />
+              <p>Package: <a href="https://www.npmjs.com/package/${pluginName}"><b>${pluginName}</b></a><br />
               Type: <b>${pluginType}</b><br />
               Status: <b>${status}</b><br />
               Since: <b>${timeString}</b></p>
