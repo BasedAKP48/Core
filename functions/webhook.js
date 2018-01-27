@@ -1,13 +1,10 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const parse = require('url').parse;
 
 const root = admin.database().ref().child('webhooks');
 
 function processWebhook(req, res) {
-  console.log(req.path);
-  const url = parse(req.url);
-  const token = url.pathname;
+  const token = req.path;
   if (!token || token === '/') { // Called /webhook/ directly
     return res.send(400); // Bad request
   }
