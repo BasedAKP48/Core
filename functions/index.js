@@ -15,3 +15,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'incrementMessag
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'github') {
   exports.github = require('./github.js');
 }
+
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'webhook') {
+  exports.webhook = require('./webhook');
+}
