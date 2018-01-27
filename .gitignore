@@ -62,3 +62,4 @@ serviceAccount.json
 
 # vsc environment files
 .vscode
+/.firebaserc
