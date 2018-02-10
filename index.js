@@ -46,7 +46,8 @@ const ALLOWED_MESSAGE_FIELDS = [
   'channel', // What channel the message came from
   'type', // What type of message this is
   'data', // Anything a client might need to "remember" about a message can go here.
-  'timeReceived', // The time the message was received. If not included, this will be generated.
+  'timeReceived', // (deprecated) The time the message was received.
+  'timestamp', // The time the message was received. If not included, this will be generated.
 ];
 
 /**
@@ -74,8 +75,11 @@ function processMessage(e) {
   });
 
   // add the time received, if the providing plugin did not populate it.
-  if (!msg.timeReceived) {
-    msg.timeReceived = Date.now();
+  if (msg.timeReceived) {
+    msg.timestamp = msg.timeReceived;
+    delete msg.timeReceived;
+  } else if (!msg.timestamp) {
+    msg.timestamp = Date.now();
   }
 
   // Is this an outgoing message?
