@@ -24,8 +24,6 @@ function processWebhook(req, res) {
       }
       // We have listeners, send the data.
       const data = root.child('data').push();
-      // Remove on disconnect
-      data.onDisconnect().remove();
       // Set data
       data.set({
         body: req.body,
@@ -37,39 +35,33 @@ function processWebhook(req, res) {
       // Tell listeners to listen for data
       Object.keys(listeners).forEach((CID) => {
         const key = value.ref.child(`${CID}/hooks/${data.key}`);
+        // We keep this one just in case someone doesn't delete their key (bad plugins!)
         key.onDisconnect().remove();
         key.set(true);
       });
       return data;
     })
-    .then(data => new Promise((resolve) => {
-      if (!data) {
-        resolve();
-        return;
-      }
+    .then((data) => {
+      if (!data) return;
       // Listen for "status" update
       const hookStatus = data.child('status');
       // 504: Gateway timeout, after 5 seconds
       setTimeout(() => exit(504), 5000);
-      hookStatus.on('value', (v2) => {
-        const status = parseInt(v2.val(), 10);
-        if (!status) return;
-        // Send status
+      hookStatus.on('value', (value) => {
+        const status = value.val();
+        if (!parseInt(status, 10)) return;
+        // Send raw status.
         exit(status);
       });
 
       function exit(status) {
         hookStatus.off('value');
+        data.ref.remove();
         res.send(status);
-        resolve(true);
       }
-    }))
-    // Wacky hack to trigger "onDisconnect"
-    .then((goOffline) => {
-      if (!goOffline) return;
-      admin.database().goOffline();
-      admin.database().goOnline();
-    });
+    })
+    // Throw any random errors we shouldn't be getting to the console.
+    .catch(e => console.error(e));
 }
 
 module.exports = functions.https.onRequest(processWebhook);
