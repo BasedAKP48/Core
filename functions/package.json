@@ -7,8 +7,8 @@
   "author": "Austin Peterson <austin@akpwebdesign.com>",
   "license": "MIT",
   "dependencies": {
-    "firebase-admin": "^5.6.0",
-    "firebase-functions": "^0.7.5"
+    "firebase-admin": "^5.10.0",
+    "firebase-functions": "^0.8.1"
   },
   "private": true
 }

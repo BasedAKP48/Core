@@ -5,7 +5,7 @@ const pkg = require('./package.json');
 
 const presenceSystem = PresenceSystem();
 
-initialize(admin, serviceAccount);
+initialize(serviceAccount);
 
 // Reference to the root of our database, for convenience.
 const rootRef = admin.database().ref();
