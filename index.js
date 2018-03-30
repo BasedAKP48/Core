@@ -1,33 +1,35 @@
-const admin = require('firebase-admin');
-const serviceAccount = require('./serviceAccount.json');
-const { initialize, PresenceSystem, getCID } = require('@basedakp48/plugin-utils');
-const pkg = require('./package.json');
+const utils = require('@basedakp48/plugin-utils');
 
-const presenceSystem = PresenceSystem();
-
-initialize(serviceAccount);
-
-// Reference to the root of our database, for convenience.
-const rootRef = admin.database().ref();
-const cid = getCID(rootRef, __dirname);
-
-presenceSystem.initialize({
-  rootRef,
-  cid,
-  pkg,
-  instanceName: 'Core',
+const core = new utils.Module({
+  dir: __dirname,
+  name: 'Core',
+  type: 'core',
   listenMode: 'core',
+});
+const rootRef = core.root;
+const presenceSystem = core.presenceSystem();
+
+let messageLimit = 1000;
+
+core.on('config', (val) => {
+  if (!val) return;
+  messageLimit = val.limit || 1000;
 });
 
 presenceSystem.on('connect', () => {
   console.log('Core is now connected and listening for messages');
+  cleanMessages()
+    .catch(console.error);
 });
 
 presenceSystem.on('disconnect', () => {
   console.log('Core has disconnected from Firebase! Automatically attempting to reconnect...');
 });
 
-rootRef.child('pendingMessages').on('child_added', processMessage);
+rootRef.child('pendingMessages').on('child_added', (snapshot) => {
+  processMessage(snapshot)
+    .catch(console.error);
+});
 
 // The fields that a message is required to contain.
 const REQUIRED_MESSAGE_FIELDS = [
@@ -59,7 +61,7 @@ function processMessage(e) {
   const msg = e.val();
 
   // if we don't have a message, just return.
-  if (!msg) { return; }
+  if (!msg) return Promise.resolve();
 
   // for each required field, make sure the message has the field.
   for (let i = 0; i < REQUIRED_MESSAGE_FIELDS.length; i++) {
@@ -71,7 +73,7 @@ function processMessage(e) {
   // for each field in the message, verify that the key is allowed.
   // if the key is not allowed, it is extraneous, and should be removed.
   Object.keys(msg).forEach((k) => {
-    if (Object.hasOwnProperty.call(msg, k) && !ALLOWED_MESSAGE_FIELDS.includes(k)) delete msg[k];
+    if (!ALLOWED_MESSAGE_FIELDS.includes(k)) delete msg[k];
   });
 
   // add the time received, if the providing plugin did not populate it.
@@ -96,15 +98,31 @@ function processMessage(e) {
   // Is this an internal message?
   if (msg.type.toLowerCase() === 'internal' || msg.type.toLowerCase() === 'akpacket') {
     msg.type = 'internal'; // force a standardized type
-    return rootRef.child(`clients/${msg.cid}`).push(msg).then(() => e.ref.remove());
+    return rootRef.child(`clients/${msg.cid}`).push(msg)
+      .then(() => e.ref.remove());
   }
 
   // push the message into the messages queue and remove it from the raw messages queue.
-  return rootRef.child('messages').push(msg).then(() => {
-    if (outgoing) {
-      rootRef.child(`clients/${msg.cid}`).push(msg);
-    }
-  }).then(() => e.ref.remove());
+  return rootRef.child('messages').push(msg)
+    .then(() => outgoing && rootRef.child(`clients/${msg.cid}`).push(msg))
+    .then(() => e.ref.remove())
+    .then(() => cleanMessages());
+}
+
+function cleanMessages() {
+  return rootRef.child('messages').orderByKey().once('value')
+    .then((snapshot) => {
+      const count = snapshot.numChildren();
+      if (count <= messageLimit) return null;
+      let limit = count - messageLimit;
+      const update = {};
+      snapshot.forEach((child) => {
+        if (limit === 0) return;
+        limit -= 1;
+        update[child.key] = null;
+      });
+      return snapshot.ref.update(update);
+    });
 }
 
 function hasOne(object, array) {
