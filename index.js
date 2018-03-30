@@ -13,7 +13,9 @@ let messageLimit = 1000;
 
 core.on('config', (val) => {
   if (!val) return;
-  messageLimit = val.limit || 1000;
+  if (val.limit !== undefined) { // Allow for 0
+    messageLimit = Math.max(val.limit, 0);
+  }
 });
 
 presenceSystem.on('connect', () => {
