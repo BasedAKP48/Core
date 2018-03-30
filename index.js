@@ -112,7 +112,7 @@ function processMessage(e) {
 }
 
 function cleanMessages() {
-  return rootRef.child('messages').orderByChild('timeReceived').once('value')
+  return rootRef.child('messages').orderByChild('timestamp').once('value')
     .then((snapshot) => {
       const count = snapshot.numChildren();
       if (count <= messageLimit) return null;
