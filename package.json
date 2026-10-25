@@ -9,7 +9,7 @@
     "Alan H (feildmaster) <akp48@feildmaster.com> (https://feildmaster.com/)"
   ],
   "engines": {
-    "node": ">=24"
+    "node": ">=24 <26"
   },
   "scripts": {
     "start": "node --env-file-if-exists=.env index.js"
