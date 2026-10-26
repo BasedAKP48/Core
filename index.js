@@ -1,4 +1,5 @@
 const utils = require('@basedakp48/plugin-utils');
+const pruneExpired = require('./lib/prune');
 
 const core = new utils.Module({
   dir: __dirname,
@@ -9,12 +10,20 @@ const core = new utils.Module({
 const rootRef = core.root;
 const presenceSystem = core.presenceSystem();
 
+const PRUNE_INTERVAL = 10 * 60 * 1000;
+
 let messageLimit = 1000;
+let messageTTL = 7;
+let lastPrune = 0;
 
 core.on('config', (val) => {
   if (!val) return;
   if (val.limit !== undefined) { // Allow for 0
     messageLimit = Math.max(val.limit, 0);
+  }
+  if (val.ttl !== undefined) { // Days, 0 keeps messages until the limit removes them
+    messageTTL = Math.max(Number(val.ttl) || 0, 0);
+    lastPrune = 0;
   }
 });
 
@@ -111,8 +120,16 @@ function processMessage(e) {
     .then(() => cleanMessages());
 }
 
+function cleanExpired() {
+  const now = Date.now();
+  if (now - lastPrune < PRUNE_INTERVAL) return Promise.resolve(0);
+  lastPrune = now;
+  return pruneExpired(rootRef.child('messages'), { ttl: messageTTL, now });
+}
+
 function cleanMessages() {
-  return rootRef.child('messages').orderByChild('timestamp').once('value')
+  return cleanExpired()
+    .then(() => rootRef.child('messages').orderByChild('timestamp').once('value'))
     .then((snapshot) => {
       const count = snapshot.numChildren();
       if (count <= messageLimit) return null;
