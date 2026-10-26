@@ -54,6 +54,19 @@
         //
         // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
+        const escapeHtml = text => String(text).replace(/[&<>"']/g, c => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]));
+
+        const isWebLink = url => typeof url === 'string' && /^https?:\/\//i.test(url);
+
+        function packageLabel(name, repository) {
+          if (!name) return '<b>(unknown)</b>';
+          const label = `<b>${escapeHtml(name)}</b>`;
+          if (isWebLink(repository)) return `<a href="${escapeHtml(repository)}">${label}</a>`;
+          return `<a href="https://www.npmjs.com/package/${escapeHtml(encodeURI(name))}">${label}</a>`;
+        }
+
         try {
           firebase.database().ref('/totalMessageCount').on('value', (d) => {
             document.getElementById('messageCount').innerHTML = d.val().toLocaleString();
@@ -67,6 +80,7 @@
               const plugin = plugins[pluginKey];
               // not sure if object destructuring works in all common browsers
               const pluginName = plugin.info.pluginName;
+              const pluginRepository = plugin.info.pluginRepository;
               const instanceName = plugin.info.instanceName;
               const version = plugin.info.pluginVersion;
               let pluginType = plugin.info.listenMode;
@@ -89,11 +103,11 @@
               }
 
               // put it all together now
-              output[time] = `<h3>${instanceName} (v${version})</h2>
-              <p>Package: <a href="https://www.npmjs.com/package/${pluginName}"><b>${pluginName}</b></a><br />
-              Type: <b>${pluginType}</b><br />
+              output[time] = `<h3>${escapeHtml(instanceName)} (v${escapeHtml(version)})</h3>
+              <p>Package: ${packageLabel(pluginName, pluginRepository)}<br />
+              Type: <b>${escapeHtml(pluginType)}</b><br />
               Status: <b>${status}</b><br />
-              Since: <b>${timeString}</b></p>
+              Since: <b>${escapeHtml(timeString)}</b></p>
               <hr />
               `;
             });
